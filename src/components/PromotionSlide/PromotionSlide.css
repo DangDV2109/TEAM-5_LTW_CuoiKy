@@ -1,0 +1,359 @@
+/* ============================================================
+   PromotionSlide.css — Slide 7: Khuyến Mãi (PTIT Cine)
+   - Tham khảo bố cục https://chieuphimquocgia.com.vn/promotions?page=1
+   - Lưới 4 cột x 2 hàng (8 thẻ / trang)
+   - Không có tiêu đề
+   - Sử dụng nút PREV và NEXT để chuyển trang khuyến mãi
+   ============================================================ */
+
+.promotion-slide-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #10141b;
+  background-image: radial-gradient(circle at center, #181e29 0%, #10141b 70%, #0b0e14 100%);
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: calc(var(--header-h, 51px) + 1.15rem) 4.5rem 5.6rem 2.2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+
+.promo-main-area {
+  position: relative;
+  width: 100%;
+  max-width: 1380px;
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 0 3.6rem;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nút PREV & NEXT hai bên */
+.promo-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 32px;
+  height: 54px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #d1d5db;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.promo-nav-btn:hover {
+  color: #ED1C24;
+  transform: translateY(-50%) scale(1.08);
+}
+
+.promo-nav-btn.prev-btn {
+  left: 0;
+}
+
+.promo-nav-btn.next-btn {
+  right: 0;
+}
+
+.promo-nav-arrow {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.promo-nav-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+/* Lưới 4 cột x 2 hàng theo chuẩn chieuphimquocgia.com.vn/promotions */
+.promo-cards-grid {
+  width: 100%;
+  height: 100%;
+  max-height: 680px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+  animation: promoGridFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes promoGridFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Thẻ Khuyến mãi chuẩn Trung tâm Chiếu phim Quốc gia (NCC) */
+.ncc-promo-card {
+  display: flex;
+  flex-direction: column;
+  background: #161b24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  min-height: 0;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ncc-promo-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(237, 28, 36, 0.65);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+}
+
+.ncc-promo-thumb {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.ncc-promo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.ncc-promo-card:hover .ncc-promo-img {
+  transform: scale(1.07);
+}
+
+.ncc-promo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18) 0%, transparent 50%, rgba(16, 20, 27, 0.85) 100%);
+  pointer-events: none;
+}
+
+.ncc-promo-badge {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.6rem;
+  padding: 0.24rem 0.58rem;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+.ncc-promo-body {
+  padding: 0.7rem 0.85rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  flex-shrink: 0;
+  background: #161b24;
+}
+
+.ncc-promo-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.ncc-promo-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.38;
+  color: #f8fafc;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.ncc-promo-card:hover .ncc-promo-title {
+  color: #ED1C24;
+}
+
+/* Modal chi tiết khuyến mãi */
+.promo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.promo-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  background: #161b24;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  overflow-y: auto;
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.75);
+  animation: promoGridFadeIn 0.22s ease both;
+}
+
+.promo-modal-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 5;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.promo-modal-close:hover {
+  background: #ED1C24;
+  border-color: #ED1C24;
+}
+
+.promo-modal-banner {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.promo-modal-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promo-modal-badge {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.promo-modal-content {
+  padding: 1.25rem 1.4rem 1.5rem;
+}
+
+.promo-modal-date {
+  display: block;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+
+.promo-modal-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.4;
+}
+
+.promo-modal-summary {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.promo-modal-rules {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+}
+
+.promo-modal-rules h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #fde047;
+}
+
+.promo-modal-rules ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  color: #e2e8f0;
+  line-height: 1.45;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .promo-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .promotion-slide-container {
+    padding: calc(var(--header-h, 51px) + 0.65rem) 0.75rem 5.2rem;
+  }
+
+  .promo-main-area {
+    padding: 0 2.1rem;
+  }
+
+  .promo-cards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .ncc-promo-card:nth-child(n + 5) {
+    display: none;
+  }
+
+  .ncc-promo-title {
+    font-size: 0.76rem;
+  }
+}
