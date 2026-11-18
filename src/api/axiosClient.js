@@ -1,8 +1,12 @@
 import axios from "axios";
+import mockAdapter from "./mockAdapter";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
 });
+
+// VITE_USE_MOCK=true => dùng backend giả (xem mockAdapter.js)
+if (import.meta.env.VITE_USE_MOCK === "true") axiosClient.defaults.adapter = mockAdapter;
 
 // Tự gắn JWT vào mọi request
 axiosClient.interceptors.request.use((config) => {
