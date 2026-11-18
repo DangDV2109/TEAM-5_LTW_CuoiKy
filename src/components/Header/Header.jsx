@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Header.css';
 import ptitLogo from '../../assets/ptit-logo.png';
 import mapIcon from '../../assets/map-icon.png';
@@ -8,6 +10,7 @@ import mapIcon from '../../assets/map-icon.png';
  * - Màn hình máy tính: Giữ nguyên như ban đầu (5 nút ĐẶT VÉ, LỊCH CHIẾU... cạnh logo với hover Arena Breakout).
  * - Màn hình điện thoại (khi thu nhỏ): Tự động ẩn 5 nút và hiện nút 3 gạch (Hamburger Menu).
  *   Khi click nút 3 gạch sẽ trượt mở menu chứa toàn bộ các nút bị ẩn.
+ * - Nút Tài khoản: chưa đăng nhập -> /login, đã đăng nhập -> /profile (TV2).
  */
 const Header = ({
   onNavigateHome = () => { },
@@ -16,6 +19,8 @@ const Header = ({
   activeSlide = 0,
   onTabChange = () => { }
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -48,6 +53,7 @@ const Header = ({
     setCurrentTab('');
     setIsMobileMenuOpen(false);
     onNavigateHome();
+    navigate('/'); // nếu đang ở trang /login, /profile... thì quay về trang chủ
   };
 
   // Click các nút điều hướng
@@ -56,6 +62,13 @@ const Header = ({
     setCurrentTab(item.id);
     setIsMobileMenuOpen(false); // Tự động đóng menu trên điện thoại sau khi chọn
     onTabChange(item.id, item.label, targetSlideIndex);
+    navigate('/'); // nếu đang ở trang của TV2 thì quay về trang chủ rồi mới đổi slide
+  };
+
+  // Click nút Tài khoản
+  const handleAccountClick = () => {
+    setIsMobileMenuOpen(false);
+    navigate(user ? '/profile' : '/login');
   };
 
   // Submit tìm kiếm khi nhấn Enter
@@ -183,11 +196,11 @@ const Header = ({
             hỗ trợ
           </button>
 
-          {/* Nút Tài khoản */}
+          {/* Nút Tài khoản: chưa đăng nhập -> /login, đã đăng nhập -> /profile */}
           <button
             type="button"
             className="header-action-btn"
-            onClick={() => console.log('Click Tài khoản')}
+            onClick={handleAccountClick}
           >
             <svg
               className="user-icon"
@@ -197,7 +210,7 @@ const Header = ({
             >
               <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
             </svg>
-            <span className="desktop-only">tài khoản</span>
+            <span className="desktop-only">{user ? user.name : 'tài khoản'}</span>
           </button>
 
           {/* NÚT 3 GẠCH (HAMBURGER BUTTON) - Chỉ hiện khi thu nhỏ trên điện thoại */}
@@ -253,6 +266,13 @@ const Header = ({
 
           {/* Tiện ích thêm trong menu mobile */}
           <div className="mobile-menu-footer">
+            <button
+              type="button"
+              className="mobile-footer-btn"
+              onClick={handleAccountClick}
+            >
+              {user ? `Tài khoản: ${user.name}` : 'Đăng nhập / Đăng ký'}
+            </button>
             <button
               type="button"
               className="mobile-footer-btn"
