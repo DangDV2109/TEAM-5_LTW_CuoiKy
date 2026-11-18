@@ -1,3 +1,5 @@
+import { Routes, Route } from 'react-router-dom';
+import { tv2Routes } from './tv2Routes';
 import React, { useState } from 'react';
 import Header from './components/Header/Header';
 import BodySlider from './components/BodySlider/BodySlider';
@@ -8,7 +10,7 @@ import CommunityPage from './pages/CommunityPage';
 import { moviesData } from './data/moviesData';
 import './App.css';
 
-const App = () => {
+const MainSite = () => {
   const [activeTab, setActiveTab] = useState('booking');
   // 0: Slide 1, 1: Slide 2, 2: Slide 3 (phim đang chiếu), 3: Slide 4 (phim sắp chiếu), 4: Slide 5 (phim Việt Nam), 5: Slide 6 (Giá vé + Footer)
   const [activeSlide, setActiveSlide] = useState(0);
@@ -179,5 +181,12 @@ const App = () => {
     </div>
   );
 };
+
+const App = () => (
+  <Routes>
+    {tv2Routes}
+    <Route path="*" element={<MainSite />} />
+  </Routes>
+);
 
 export default App;
