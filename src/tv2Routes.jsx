@@ -7,6 +7,7 @@ import SeatSelection from "./pages/SeatSelection";
 import ComboSelection from "./pages/ComboSelection";
 import Payment from "./pages/Payment";
 import TicketResult from "./pages/TicketResult";
+import DemoBooking from "./pages/DemoBooking";
 import { Route } from "react-router-dom";
 
 const P = (el) => <ProtectedRoute>{el}</ProtectedRoute>;
@@ -14,6 +15,7 @@ const P = (el) => <ProtectedRoute>{el}</ProtectedRoute>;
 // Dùng trong <Routes>:  {tv2Routes}
 export const tv2Routes = (
   <>
+    <Route path="/demo-booking" element={<DemoBooking />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/profile" element={P(<Profile />)} />
