@@ -9,7 +9,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const from = useLocation().state?.from;
+  const loc = useLocation();
+  const from = loc.state?.from;
+  const info = loc.state?.info;
 
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -21,7 +23,7 @@ export default function Login() {
       // Giả định BE trả: { token, user: { id, name, email, role } }
       const { data } = await axiosClient.post("/auth/login", form);
       login(data.token, data.user);
-      navigate(from || (data.user.role === "ADMIN" ? "/admin" : "/"));
+      navigate(from || (data.user.role === "ADMIN" ? "/admin" : "/"), from ? { state: { info } } : undefined);
     } catch (err) {
       setError(err.response?.data?.message || "Sai email hoặc mật khẩu");
     } finally {

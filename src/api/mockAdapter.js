@@ -41,10 +41,13 @@ function buildSeats(showtimeId, db) {
   return seats;
 }
 
+// Thông tin phim/rạp/ngày/giờ lấy từ trang chi tiết phim (b.info), không có thì dùng suất demo
 const toTicket = (b) => ({
   id: b.id, status: b.status, total: b.total, code: b.code,
-  movieTitle: SHOWTIMES[b.showtimeId]?.movieTitle || "Phim Demo",
-  showtime: SHOWTIMES[b.showtimeId]?.showtime || "",
+  movieTitle: b.info?.movieTitle || SHOWTIMES[b.showtimeId]?.movieTitle || "Phim Demo",
+  showtime: b.info
+    ? [b.info.time, b.info.date, b.info.cinemaName].filter(Boolean).join(" · ")
+    : SHOWTIMES[b.showtimeId]?.showtime || "",
   seats: b.seatLabels,
 });
 
@@ -82,7 +85,6 @@ export default async function mockAdapter(config) {
 
   // --- Ghế, combo ---
   if (method === "get" && (m = path.match(/^\/showtimes\/([^/]+)\/seats$/))) {
-    if (!SHOWTIMES[m[1]]) return fail(config, 404, "Không tìm thấy suất chiếu");
     return ok(config, buildSeats(m[1], db));
   }
   if (method === "get" && path === "/combos") return ok(config, COMBOS);
@@ -95,7 +97,7 @@ export default async function mockAdapter(config) {
     const id = `bk_${Date.now()}`;
     db.bookings[id] = {
       id, showtimeId: body.showtimeId, seatLabels: picked.map((s) => s.id), seatsTotal: picked.reduce((t, s) => t + s.price, 0),
-      status: "HOLD", expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), createdAt: Date.now(), code: `PTIT-${id.slice(3)}`,
+      info: body.showtimeInfo || null, status: "HOLD", expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(), createdAt: Date.now(), code: `PTIT-${id.slice(3)}`,
     };
     save(db);
     return ok(config, { bookingId: id, expiresAt: db.bookings[id].expiresAt });

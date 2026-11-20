@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from "react";
 const BookingContext = createContext(null);
 export const useBooking = () => useContext(BookingContext);
 
-const EMPTY = { showtimeId: null, seats: [], bookingId: null, expiresAt: null, combos: [] };
+const EMPTY = { showtimeId: null, seats: [], bookingId: null, expiresAt: null, combos: [], showtimeInfo: null };
 
 export function BookingProvider({ children }) {
   const [booking, setBooking] = useState(() => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './MovieDetailPage.css';
 import { citiesData } from '../data/cinemasData';
 import SearchableSelect from '../components/ScheduleSlide/SearchableSelect';
@@ -23,6 +24,8 @@ const MovieDetailPage = ({
   initialSelection = {},
   onBack = () => {}
 }) => {
+  const navigate = useNavigate();
+
   // Cuộn lên đầu trang khi mở trang chi tiết phim
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -217,12 +220,31 @@ const MovieDetailPage = ({
     setSelectedTime(time);
     setBookingNotice({
       movieTitle: movie.title,
+      cinemaId: cinema.id,
       cinemaName: cinema.name,
       cinemaAddress: cinema.address,
       date: selectedDate,
       format: fmt,
       time
     });
+  };
+
+  // Bấm "Tiếp tục chọn ghế": sang trang chọn ghế (TV2), mang theo thông tin suất chiếu
+  // Mã suất chiếu tạm ghép từ phim + rạp + ngày + định dạng + giờ.
+  // Khi backend có mã suất chiếu thật (showtimeId), thay dòng tạo showtimeId bên dưới.
+  const handleContinueToSeats = () => {
+    if (!bookingNotice) return;
+    const showtimeId = [
+      'st',
+      movie.id,
+      bookingNotice.cinemaId,
+      bookingNotice.date,
+      bookingNotice.format,
+      bookingNotice.time
+    ]
+      .join('_')
+      .replace(/[^a-zA-Z0-9]+/g, '-');
+    navigate(`/showtimes/${showtimeId}/seats`, { state: { info: bookingNotice } });
   };
 
   if (!movie) return null;
@@ -508,11 +530,7 @@ const MovieDetailPage = ({
                 <button
                   type="button"
                   className="confirm-seat-btn"
-                  onClick={() =>
-                    alert(
-                      `Xác nhận đặt vé:\n- Phim: ${bookingNotice.movieTitle}\n- Rạp: ${bookingNotice.cinemaName}\n- Định dạng: ${bookingNotice.format}\n- Ngày: ${bookingNotice.date}\n- Suất chiếu: ${bookingNotice.time}`
-                    )
-                  }
+                  onClick={handleContinueToSeats}
                 >
                   Tiếp tục chọn ghế →
                 </button>
