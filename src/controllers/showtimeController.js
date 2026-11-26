@@ -4,6 +4,7 @@ import Room from '../models/Room.js';
 import AppError from '../utils/AppError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import { isObjectId, parseIdList, parseVietnamDay, getPagination, buildPagination } from '../utils/query.js';
+import { holdSeats as holdSeatsService, releaseSeats } from '../services/seatService.js';
 import { toSeatLabel } from '../utils/seats.js';
 
 const bufferMinutes = () => Number(process.env.SHOWTIME_BUFFER_MINUTES ?? 15);
@@ -162,4 +163,18 @@ export const getSeatMap = asyncHandler(async (req, res) => {
     serverTime: now,
     holdMinutes: Number(process.env.HOLD_MINUTES) || 5
   });
+});
+
+export const holdSeats = asyncHandler(async (req, res) => {
+  const result = await holdSeatsService({
+    showtimeId: req.params.id,
+    userId: req.user._id,
+    labels: req.body.seats
+  });
+  res.status(200).json({ success: true, message: 'Đã giữ ghế', ...result });
+});
+
+export const releaseHold = asyncHandler(async (req, res) => {
+  await releaseSeats({ showtimeId: req.params.id, userId: req.user._id });
+  res.status(200).json({ success: true, message: 'Đã bỏ giữ ghế' });
 });

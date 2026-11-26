@@ -1,4 +1,5 @@
 import { isObjectId } from '../utils/query.js';
+import { isSeatLabel, MAX_SEATS_PER_BOOKING } from '../utils/seats.js';
 
 const isValidDate = (v) => (typeof v === 'string' || typeof v === 'number') && !Number.isNaN(new Date(v).getTime());
 const isPrice = (v) => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 10000000;
@@ -27,6 +28,18 @@ export const validateUpdateShowtime = ({ startTime, price }) => {
       if (price.standard !== undefined && !isPrice(price.standard)) errors['price.standard'] = 'Giá ghế thường không hợp lệ';
       if (price.vip !== undefined && !isPrice(price.vip)) errors['price.vip'] = 'Giá ghế VIP không hợp lệ';
     }
+  }
+  return errors;
+};
+
+export const validateHoldSeats = ({ seats }) => {
+  const errors = {};
+  if (!Array.isArray(seats) || seats.length === 0) {
+    errors.seats = 'Vui lòng chọn ít nhất 1 ghế';
+  } else if (!seats.every(isSeatLabel)) {
+    errors.seats = 'Mã ghế không hợp lệ (ví dụ: A1, B12)';
+  } else if (new Set(seats.map((s) => s.trim().toUpperCase())).size > MAX_SEATS_PER_BOOKING) {
+    errors.seats = `Chỉ được chọn tối đa ${MAX_SEATS_PER_BOOKING} ghế mỗi lần`;
   }
   return errors;
 };
