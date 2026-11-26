@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import theaterRoutes from './routes/theaterRoutes.js';
 import roomRoutes from './routes/roomRoutes.js';
+import showtimeRoutes from './routes/showtimeRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/theaters', theaterRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/showtimes', showtimeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
