@@ -457,3 +457,50 @@ html:has(.tv2-page), body:has(.tv2-page) { background: var(--tv2-bg); min-height
   justify-content: flex-end;
   gap: 10px;
 }
+
+/* ===== TV2: đăng nhập / tài khoản / ví / admin ===== */
+.tv2-back { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid #4a4f5c; background: transparent; color: var(--tv2-text); font-size: 14px; cursor: pointer; transition: all .2s; }
+.tv2-back:hover { border-color: var(--tv2-accent); color: var(--tv2-accent); }
+.tv2-auth { max-width: 440px; }
+.tv2-auth .tv2-form { margin-top: 0; max-width: none; }
+.tv2-auth-head p { margin: 0; }
+.tv2-field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--tv2-muted); }
+.tv2-field > span { font-weight: 600; }
+.tv2-pw { position: relative; display: flex; }
+.tv2-pw input { flex: 1; padding-right: 64px; }
+.tv2-pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: transparent; color: var(--tv2-accent); font-weight: 600; cursor: pointer; padding: 6px 8px; }
+.tv2-check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--tv2-muted); cursor: pointer; }
+.tv2-auth-foot { text-align: center; }
+.tv2-notice { padding: 10px 12px; border-radius: 8px; background: rgba(34,197,94,.12); color: #86efac !important; }
+.tv2-card { padding: 16px 18px; margin: 14px 0; background: var(--tv2-panel); border: 1px solid #343949; border-radius: 12px; }
+.tv2-card p { margin: 6px 0; }
+.tv2-muted { color: var(--tv2-muted); } .tv2-muted.small, .small { font-size: 13px; }
+.tv2-money { color: var(--tv2-accent); font-weight: 700; }
+.tv2-balance { font-size: 32px; font-weight: 800; color: var(--tv2-accent); }
+.tv2-pos { color: var(--tv2-normal); } .tv2-neg { color: var(--tv2-err); }
+.tv2-okmsg { color: var(--tv2-normal); }
+.tv2-menu { display: grid; gap: 10px; margin: 14px 0 18px; }
+.tv2-menu-item { display: block; padding: 14px 16px; border-radius: 10px; background: var(--tv2-panel); border: 1px solid #343949; text-decoration: none; color: var(--tv2-text) !important; }
+.tv2-menu-item:hover { border-color: var(--tv2-accent); }
+.tv2-menu-item.admin { border-color: var(--tv2-accent); }
+.tv2-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: #343949; }
+.tv2-badge.ok { background: rgba(34,197,94,.18); color: #86efac; }
+.tv2-badge.warn { background: rgba(234,179,8,.18); color: #fde047; }
+.tv2-badge.bad { background: rgba(255,107,107,.18); color: #fca5a5; }
+.tv2-input { padding: 10px 12px; border-radius: 8px; border: 1px solid #4a5062; background: #12141a; color: #fff; font-size: 15px; box-sizing: border-box; }
+.tv2-topup { display: flex; flex-direction: column; gap: 12px; }
+.tv2-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.tv2-chip { padding: 8px 14px; border-radius: 999px; border: 1px solid #4a4f5c; background: transparent; color: var(--tv2-text); cursor: pointer; }
+.tv2-chip.active { background: var(--tv2-accent); color: #1a1405; border-color: var(--tv2-accent); font-weight: 700; }
+.tv2-fav { display: flex; align-items: center; gap: 12px; } .tv2-fav img { width: 44px; height: 64px; object-fit: cover; border-radius: 6px; }
+.tv2-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.tv2-tab { padding: 8px 14px; border-radius: 8px; border: 1px solid #4a4f5c; background: transparent; color: var(--tv2-text); cursor: pointer; }
+.tv2-tab.active { background: var(--tv2-accent); color: #1a1405; font-weight: 700; border-color: var(--tv2-accent); }
+.tv2-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; } .tv2-toolbar .tv2-input { flex: 1; max-width: 360px; }
+.tv2-table-wrap { overflow-x: auto; border: 1px solid #343949; border-radius: 10px; }
+.tv2-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tv2-table th, .tv2-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #2a2e3a; vertical-align: top; }
+.tv2-table th { background: var(--tv2-panel); color: var(--tv2-muted); font-weight: 600; white-space: nowrap; }
+.tv2-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.tv2-btn.sm { padding: 5px 10px; font-size: 13px; }
+.tv2-modal-card { width: 100%; max-width: 440px; max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 10px; }

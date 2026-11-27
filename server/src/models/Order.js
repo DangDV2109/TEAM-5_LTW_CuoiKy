@@ -37,7 +37,7 @@ const orderSchema = new mongoose.Schema(
       index: true,
     },
     holdExpiresAt: Date,
-    paymentMethod: { type: String, enum: ["PAYOS", "VIETQR", "SIMULATE"] },
+    paymentMethod: { type: String, enum: ["PAYOS", "VIETQR", "SIMULATE", "WALLET"] },
     orderCode: { type: Number, unique: true, sparse: true },
     paymentLinkId: String,
     checkoutUrl: String,

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import {
   authRouter, movieRouter, reviewRouter, comboRouter, showtimeRouter,
-  bookingRouter, paymentRouter, statsRouter, cinemaRouter,
+  bookingRouter, paymentRouter, statsRouter, cinemaRouter, userRouter, adminRouter,
 } from "./routes/index.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
@@ -16,7 +16,9 @@ app.get("/", (_req, res) => res.json({ name: "PTIT Cinema API", status: "ok" }))
 app.get("/api/health", (_req, res) => res.json({ success: true, uptime: process.uptime() }));
 
 app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 app.use("/api/users", authRouter);
+app.use("/api/admin", adminRouter);
 app.use("/api/movies", movieRouter);
 app.use("/api/admin/movies", movieRouter);
 app.use("/api/reviews", reviewRouter);

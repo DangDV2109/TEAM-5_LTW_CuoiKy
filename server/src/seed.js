@@ -35,9 +35,9 @@ const COMBOS = [
 ];
 
 const USERS = [
-  { name: "Quản trị viên", email: "admin@ptitcine.vn", password: "Admin12345", role: "ADMIN" },
-  { name: "Quản trị viên", email: "admin@ptitcinema.vn", password: "admin123", role: "ADMIN" },
-  { name: "Khách hàng mẫu", email: "user@ptitcinema.vn", password: "user123456", role: "USER" },
+  { name: "Quản trị viên", email: "admin@ptitcine.vn", password: "Admin12345", role: "ADMIN", isVerified: true },
+  { name: "Quản trị viên", email: "admin@ptitcinema.vn", password: "admin123", role: "ADMIN", isVerified: true },
+  { name: "Khách hàng mẫu", email: "user@ptitcinema.vn", password: "user123456", role: "USER", isVerified: true, balance: 500000 },
 ];
 
 const toArr = (v) => (Array.isArray(v) ? v : typeof v === "string" ? v.split(/[,;]/).map((s) => s.trim()).filter(Boolean) : []);

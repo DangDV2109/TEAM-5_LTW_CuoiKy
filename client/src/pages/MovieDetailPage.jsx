@@ -8,6 +8,7 @@ import {
   loadAndPruneCommunityPosts
 } from '../data/moviesData';
 import { useAuth } from '../context/AuthContext';
+import axiosClient from '../api/axiosClient';
 import SearchableSelect from '../components/ScheduleSlide/SearchableSelect';
 import Footer from '../components/Footer/Footer';
 
@@ -87,6 +88,24 @@ const MovieDetailPage = ({
 
   // State cho nút Yêu thích & Đánh giá (đồng bộ với trang Cộng đồng)
   const [isFavorite, setIsFavorite] = useState(false);
+  // Đồng bộ yêu thích với tài khoản (cần đăng nhập)
+  useEffect(() => {
+    if (!user || !movie?.id) { setIsFavorite(false); return; }
+    axiosClient.get('/users/me/favorites')
+      .then((r) => setIsFavorite((r.data || []).some((f) => String(f.movieId) === String(movie.id))))
+      .catch(() => {});
+  }, [user, movie?.id]);
+
+  const toggleFavorite = async () => {
+    if (!user) { navigate('/login', { state: { from: '/', info: 'Hãy đăng nhập để lưu phim yêu thích' } }); return; }
+    setIsFavorite((prev) => !prev);
+    try {
+      await axiosClient.post(`/users/me/favorites/${movie.id}`, { title: movie.title, poster: movie.poster });
+    } catch {
+      setIsFavorite((prev) => !prev);
+    }
+  };
+
   const [userRating, setUserRating] = useState(() => {
     if (!movie?.id) return null;
     const existing = loadAndPruneCommunityPosts().find(
@@ -890,7 +909,7 @@ const MovieDetailPage = ({
                 <button
                   type="button"
                   className={`detail-btn detail-btn-fav ${isFavorite ? 'is-active' : ''}`}
-                  onClick={() => setIsFavorite((prev) => !prev)}
+                  onClick={toggleFavorite}
                 >
                   <span>{isFavorite ? '♥' : '♡'}</span>
                   <span>{isFavorite ? 'Đã yêu thích' : 'Yêu thích'}</span>

@@ -19,6 +19,7 @@ export const login = asyncHandler(async (req, res) => {
   if (!email || !password) throw new ApiError(400, "Vui lòng nhập email và mật khẩu");
   const user = await User.findOne({ email: String(email).toLowerCase() }).select("+password");
   if (!user || !(await user.comparePassword(password))) throw new ApiError(401, "Email hoặc mật khẩu không đúng");
+  if (user.isLocked) throw new ApiError(403, "Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên");
   ok(res, { token: signToken(user), user });
 });
 
