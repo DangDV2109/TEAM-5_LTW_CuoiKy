@@ -19,6 +19,10 @@ import Payment from './pages/Payment';
 import TicketResult from './pages/TicketResult';
 import DemoBooking from './pages/DemoBooking';
 import { hasScheduleTag } from '../../server/src/data/movieSelectors';
+import Wallet from './pages/Wallet';
+import MyReviews from './pages/MyReviews';
+import Favorites from './pages/Favorites';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import './App.css';
 
 const MainSite = () => {
@@ -243,6 +247,10 @@ const App = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+    <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+    <Route path="/my-reviews" element={<ProtectedRoute><MyReviews /></ProtectedRoute>} />
+    <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+    <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
     <Route path="/history" element={<ProtectedRoute><BookingHistory /></ProtectedRoute>} />
     <Route path="/showtimes/:showtimeId/seats" element={<ProtectedRoute><SeatSelection /></ProtectedRoute>} />
     <Route path="/booking/combo" element={<ProtectedRoute><ComboSelection /></ProtectedRoute>} />

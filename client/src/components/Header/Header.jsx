@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import SearchBar from './SearchBar';
@@ -23,7 +23,11 @@ const Header = ({
   onTabChange = () => { }
 }) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const openTimer = useRef(null);
+  const closeTimer = useRef(null);
+  const accountWrapRef = useRef(null);
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -74,11 +78,37 @@ const Header = ({
     window.open(googleMapsUrl, '_blank', 'noopener,noreferrer');
   };
 
-  // Click nút Tài khoản
+  // Click nút Tài khoản: chưa đăng nhập -> /login; đã đăng nhập -> bật/tắt menu tài khoản
   const handleAccountClick = () => {
     setIsMobileMenuOpen(false);
-    navigate(user ? '/profile' : '/login');
+    if (user) setAccountMenuOpen((v) => !v);
+    else navigate('/login');
   };
+
+  // Rê chuột giữ ~0.4s mới mở menu; rời chuột ~0.25s thì đóng
+  const hoverAccount = () => {
+    if (!user) return;
+    clearTimeout(closeTimer.current);
+    if (!accountMenuOpen) openTimer.current = setTimeout(() => setAccountMenuOpen(true), 400);
+  };
+  const leaveAccount = () => {
+    clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(() => setAccountMenuOpen(false), 250);
+  };
+  const goTo = (path) => { setAccountMenuOpen(false); setIsMobileMenuOpen(false); navigate(path); };
+  const handleLogout = () => { setAccountMenuOpen(false); setIsMobileMenuOpen(false); logout(); navigate('/login', { replace: true }); };
+
+  // Bấm ra ngoài hoặc nhấn Esc thì đóng menu
+  useEffect(() => {
+    if (!accountMenuOpen) return undefined;
+    const onDown = (e) => { if (accountWrapRef.current && !accountWrapRef.current.contains(e.target)) setAccountMenuOpen(false); };
+    const onKey = (e) => { if (e.key === 'Escape') setAccountMenuOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [accountMenuOpen]);
+  useEffect(() => { if (!user) setAccountMenuOpen(false); }, [user]);
+  useEffect(() => () => { clearTimeout(openTimer.current); clearTimeout(closeTimer.current); }, []);
 
   // Thực thi tìm kiếm từ SearchBar engine
   const handleExecuteSearch = (searchTerm) => {
@@ -184,22 +214,50 @@ const Header = ({
             hỗ trợ
           </button>
 
-          {/* Nút Tài khoản: chưa đăng nhập -> /login, đã đăng nhập -> /profile */}
-          <button
-            type="button"
-            className="header-action-btn"
-            onClick={handleAccountClick}
+          {/* Nút Tài khoản: chưa đăng nhập -> /login; đã đăng nhập -> rê chuột/bấm để mở menu tài khoản */}
+          <div
+            className="account-menu-wrap"
+            ref={accountWrapRef}
+            onMouseEnter={hoverAccount}
+            onMouseLeave={leaveAccount}
           >
-            <svg
-              className="user-icon"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
+            <button
+              type="button"
+              className="header-action-btn"
+              onClick={handleAccountClick}
+              aria-haspopup={user ? 'menu' : undefined}
+              aria-expanded={user ? accountMenuOpen : undefined}
             >
-              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
-            </svg>
-            <span className="desktop-only">{user ? user.name : 'tài khoản'}</span>
-          </button>
+              <svg
+                className="user-icon"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+              </svg>
+              <span className="desktop-only">{user ? user.name : 'tài khoản'}</span>
+            </button>
+
+            {user && accountMenuOpen && (
+              <div className="account-dropdown" role="menu">
+                <div className="account-dropdown-head">
+                  <b>{user.name}</b>
+                  {user.email && <span>{user.email}</span>}
+                  <span>Số dư ví: {Number(user.balance || 0).toLocaleString('vi-VN')}đ</span>
+                </div>
+                <button type="button" role="menuitem" onClick={() => goTo('/profile')}>⚙️ Cài đặt tài khoản</button>
+                <button type="button" role="menuitem" onClick={() => goTo('/wallet')}>💰 Nạp tiền & giao dịch</button>
+                <button type="button" role="menuitem" onClick={() => goTo('/history')}>🎟️ Lịch sử mua vé</button>
+                <button type="button" role="menuitem" onClick={() => goTo('/my-reviews')}>⭐ Lịch sử đánh giá</button>
+                <button type="button" role="menuitem" onClick={() => goTo('/favorites')}>♥ Phim yêu thích</button>
+                {String(user.role || '').toLowerCase() === 'admin' && (
+                  <button type="button" role="menuitem" onClick={() => goTo('/admin')}>🛠️ Trang quản trị</button>
+                )}
+                <button type="button" role="menuitem" className="danger" onClick={handleLogout}>Đăng xuất</button>
+              </div>
+            )}
+          </div>
 
           {/* NÚT 3 GẠCH (HAMBURGER BUTTON) - Chỉ hiện khi thu nhỏ trên điện thoại */}
           <button
@@ -257,10 +315,13 @@ const Header = ({
             <button
               type="button"
               className="mobile-footer-btn"
-              onClick={handleAccountClick}
+              onClick={() => goTo(user ? '/profile' : '/login')}
             >
               {user ? `Tài khoản: ${user.name}` : 'Đăng nhập / Đăng ký'}
             </button>
+            {user && (
+              <button type="button" className="mobile-footer-btn" onClick={handleLogout}>Đăng xuất</button>
+            )}
             <button
               type="button"
               className="mobile-footer-btn"

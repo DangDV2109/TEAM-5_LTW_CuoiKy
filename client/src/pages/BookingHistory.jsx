@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../api/axiosClient";
 import QRTicket from "../components/QRTicket";
+import BackButton from "../components/BackButton";
+import { vnd } from "../utils";
+
+const STATUS = { PAID: ["Đã thanh toán", "ok"], PENDING_PAYMENT: ["Chờ thanh toán", "warn"], CANCELLED: ["Đã huỷ", "bad"], EXPIRED: ["Hết hạn", "bad"] };
 
 export default function BookingHistory() {
   const [tickets, setTickets] = useState(null);
@@ -14,18 +18,22 @@ export default function BookingHistory() {
 
   return (
     <div className="tv2-page">
-      <h2>Lịch sử đặt vé</h2>
+      <BackButton to="/profile" label="Tài khoản" />
+      <h2>Lịch sử mua vé</h2>
       {tickets.length === 0 && <p>Bạn chưa đặt vé nào. Chọn một suất chiếu để bắt đầu.</p>}
-      {tickets.map((t) => (
-        <div className="tv2-row-card" key={t.id}>
-          <div>
-            <b>{t.movieTitle}</b>
-            <div>{t.showtime}</div>
-            <div>Ghế: {t.seats?.join(", ")} · {Number(t.total).toLocaleString()}đ</div>
+      {tickets.map((t) => {
+        const [label, cls] = STATUS[t.status] || [];
+        return (
+          <div className="tv2-row-card" key={t.id}>
+            <div>
+              <b>{t.movieTitle}</b> {label && <span className={`tv2-badge ${cls}`}>{label}</span>}
+              <div>{t.showtime}</div>
+              <div>Ghế: {t.seats?.join(", ")} · {vnd(t.total)}{t.paymentMethod ? ` · ${t.paymentMethod}` : ""}</div>
+            </div>
+            <button className="tv2-btn" onClick={() => setSelected(t)}>Xem mã QR</button>
           </div>
-          <button className="tv2-btn" onClick={() => setSelected(t)}>Xem mã QR</button>
-        </div>
-      ))}
+        );
+      })}
       {selected && <QRTicket ticket={selected} onClose={() => setSelected(null)} />}
     </div>
   );

@@ -11,6 +11,7 @@ import * as showtimes from "../controllers/showtimeController.js";
 import * as bookings from "../controllers/bookingController.js";
 import * as payments from "../controllers/paymentController.js";
 import * as stats from "../controllers/statsController.js";
+import * as users from "../controllers/userController.js";
 
 const admin = [protect, adminOnly];
 const id = validateObjectId("id");
@@ -52,6 +53,7 @@ bookingRouter.post("/:id/checkout", id, optionalAuth, bookings.checkout);
 export const paymentRouter = Router();
 paymentRouter.post("/payos-webhook", payments.payosWebhook);
 paymentRouter.post("/vietqr-webhook", payments.vietqrWebhook);
+paymentRouter.post("/wallet/:id", id, protect, payments.payWithWallet);
 paymentRouter.post("/simulate-success/:id", id, optionalAuth, payments.simulateSuccess);
 
 export const statsRouter = Router();
@@ -60,3 +62,20 @@ statsRouter.get("/movies", admin, stats.getMovieStats);
 
 export const cinemaRouter = Router();
 cinemaRouter.get("/", (_req, res) => ok(res, CINEMAS));
+
+// /api/users/me/...  (cần đăng nhập)
+export const userRouter = Router();
+userRouter.post("/me/topup", protect, users.topup);
+userRouter.get("/me/transactions", protect, users.myTransactions);
+userRouter.get("/me/reviews", protect, users.myReviews);
+userRouter.get("/me/favorites", protect, users.myFavorites);
+userRouter.post("/me/favorites/:movieId", protect, users.toggleFavorite);
+
+// /api/admin/...  (chỉ ADMIN)
+export const adminRouter = Router();
+adminRouter.get("/users", admin, users.adminListUsers);
+adminRouter.patch("/users/:id", id, admin, users.adminUpdateUser);
+adminRouter.get("/transactions", admin, users.adminTransactions);
+adminRouter.get("/orders", admin, users.adminOrders);
+adminRouter.get("/reviews", admin, users.adminReviews);
+adminRouter.get("/favorites", admin, users.adminFavorites);

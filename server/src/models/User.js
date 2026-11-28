@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, minlength: [6, "Mật khẩu tối thiểu 6 ký tự"], select: false },
     phone: { type: String, trim: true },
     role: { type: String, enum: ["ADMIN", "USER"], default: "USER" },
+    balance: { type: Number, default: 0, min: 0 },
+    isVerified: { type: Boolean, default: false },
+    isLocked: { type: Boolean, default: false },
+    // movieId là String để dùng được cả id số của dữ liệu phim phía client lẫn ObjectId của Mongo
+    favorites: [{ movieId: { type: String, required: true }, title: String, poster: String, addedAt: { type: Date, default: Date.now }, _id: false }],
   },
   { timestamps: true }
 );

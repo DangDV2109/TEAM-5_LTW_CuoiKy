@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import axiosClient from "../api/axiosClient";
 import Countdown from "../components/Countdown";
 import { useBooking } from "../context/BookingContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Payment() {
   const { booking, reset } = useBooking();
   const navigate = useNavigate();
   const [payment, setPayment] = useState(null); // { qrContent, total }
   const [error, setError] = useState("");
+  const [walletMsg, setWalletMsg] = useState("");
+  const [paying, setPaying] = useState(false);
+  const { user, updateUser } = useAuth();
 
   // 1) Tạo yêu cầu thanh toán
   useEffect(() => {
@@ -37,6 +41,20 @@ export default function Payment() {
     return () => clearInterval(timer);
   }, [payment]);
 
+  const payByWallet = async () => {
+    setWalletMsg("");
+    setPaying(true);
+    try {
+      const { data } = await axiosClient.post(`/payments/wallet/${booking.bookingId}`);
+      if (data?.balance !== undefined) updateUser({ balance: data.balance });
+      navigate(`/ticket/${booking.bookingId}`);
+    } catch (err) {
+      setWalletMsg(err.response?.data?.message || "Thanh toán bằng ví thất bại");
+    } finally {
+      setPaying(false);
+    }
+  };
+
   const onExpire = () => {
     alert("Hết thời gian thanh toán. Ghế đã được nhả.");
     const id = booking.showtimeId;
@@ -54,6 +72,10 @@ export default function Payment() {
       <div className="tv2-qr"><QRCodeSVG value={String(payment.qrContent)} size={240} /></div>
       <h3>{Number(payment.total).toLocaleString()}đ</h3>
       <p>Trang sẽ tự chuyển khi hệ thống nhận được tiền.</p>
+      <hr style={{ borderColor: "#343949", margin: "18px 0" }} />
+      <p>Hoặc thanh toán bằng ví (số dư: <b>{Number(user?.balance || 0).toLocaleString("vi-VN")}đ</b>)</p>
+      <button className="tv2-btn" onClick={payByWallet} disabled={paying}>{paying ? "Đang thanh toán..." : "Thanh toán bằng ví"}</button>
+      {walletMsg && <p className="tv2-error">{walletMsg} {walletMsg.includes("Số dư") && <Link to="/wallet">Nạp tiền</Link>}</p>}
     </div>
   );
 }
