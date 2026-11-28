@@ -1,0 +1,323 @@
+/* ========================================================
+   SearchBar Engine Styles (Ported from searchbar/src)
+   ======================================================== */
+
+.sb-engine-container {
+  position: relative;
+  width: 245px;
+  max-width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.sb-engine-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.sb-engine-icon-left {
+  position: absolute;
+  left: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.sb-engine-input {
+  width: 100%;
+  background-color: #ffffff00;
+  color: #f1f5f9;
+  font-size: 0.82rem;
+  font-family: inherit;
+  border-radius: 6px;
+  padding: 0.44rem 1.95rem 0.44rem 2.15rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  outline: none;
+  transition: background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  box-sizing: border-box;
+  border-radius: 100px;
+}
+
+.sb-engine-input::placeholder {
+  color: #94a3b8;
+}
+
+.sb-engine-input:hover {
+  background-color: #263044;
+}
+
+.sb-engine-input:focus {
+  background-color: #263044;
+  border-color: #ED1C24;
+  box-shadow: 0 0 0 1px rgba(237, 28, 36, 0.45);
+}
+
+.sb-engine-clear-btn {
+  position: absolute;
+  right: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.sb-engine-clear-btn:hover {
+  color: #f8fafc;
+}
+
+/* Dropdown menu */
+.sb-engine-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  min-width: 280px;
+  background-color: #1a2232;
+  border: 1px solid rgba(51, 65, 85, 0.85);
+  border-radius: 8px;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.72);
+  overflow: hidden;
+  z-index: 1200;
+  color: #e2e8f0;
+  animation: sbFadeIn 0.15s ease-out;
+}
+
+@keyframes sbFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sb-engine-section {
+  padding: 0.38rem 0;
+}
+
+.sb-engine-section-head {
+  padding: 0.28rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.sb-engine-counter {
+  font-size: 0.64rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.sb-engine-empty-history {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.sb-engine-history-list,
+.sb-engine-related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sb-engine-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.48rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.81rem;
+  border-top: 1px solid rgba(30, 41, 59, 0.55);
+  transition: background-color 0.15s ease;
+}
+
+.sb-engine-history-item:first-child {
+  border-top: none;
+}
+
+.sb-engine-history-item:hover {
+  background-color: #253046;
+}
+
+.sb-engine-history-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding-right: 0.5rem;
+}
+
+.sb-engine-item-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.sb-engine-history-item:hover .sb-engine-item-icon,
+.sb-engine-related-item:hover .sb-engine-item-icon {
+  color: #f1f5f9;
+}
+
+.sb-engine-history-text {
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-engine-history-item:hover .sb-engine-history-text {
+  color: #ffffff;
+}
+
+.sb-engine-history-del {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sb-engine-history-del:hover {
+  background-color: rgba(239, 68, 68, 0.85);
+  color: #ffffff;
+}
+
+/* Related section */
+.sb-engine-related-section {
+  border-top: 1px solid rgba(51, 65, 85, 0.85);
+  background-color: #151c29;
+  padding: 0.38rem 0;
+}
+
+.sb-engine-direct-search-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 0.81rem;
+  font-weight: 600;
+  color: #fb7185;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sb-engine-direct-search-btn:hover {
+  background-color: #253046;
+  color: #fda4af;
+}
+
+.sb-engine-direct-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-engine-arrow-icon {
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.sb-engine-related-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.42rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: background-color 0.15s ease;
+}
+
+.sb-engine-related-item:hover {
+  background-color: #253046;
+}
+
+.sb-engine-related-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.sb-engine-related-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sb-engine-related-title {
+  color: #e2e8f0;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-engine-related-genre {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-engine-related-date {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 992px) {
+  .sb-engine-container {
+    width: 175px;
+  }
+
+  .sb-engine-dropdown {
+    left: auto;
+    right: 0;
+    width: 280px;
+  }
+}
+
+@media (max-width: 540px) {
+  .sb-engine-container {
+    width: 145px;
+  }
+
+  .sb-engine-input {
+    font-size: 0.75rem;
+    padding: 0.38rem 1.65rem 0.38rem 1.9rem;
+  }
+}
