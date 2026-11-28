@@ -498,3 +498,12 @@
     gap: 0.75rem;
   }
 }
+/* ===== Menu tài khoản thả xuống (rê chuột / bấm) ===== */
+.account-menu-wrap { position: relative; display: flex; align-items: center; }
+.account-dropdown { position: absolute; top: calc(100% + 6px); right: 0; z-index: 2000; min-width: 250px; padding: 6px; border-radius: 12px; background: #1b1e27; border: 1px solid #343949; box-shadow: 0 12px 32px rgba(0,0,0,.45); display: flex; flex-direction: column; animation: accDrop .15s ease-out; }
+@keyframes accDrop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.account-dropdown-head { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; margin-bottom: 4px; border-bottom: 1px solid #343949; color: #fff; font-size: 14px; }
+.account-dropdown-head span { color: #9aa3b5; font-size: 12px; }
+.account-dropdown button { text-align: left; padding: 10px 12px; border: 0; border-radius: 8px; background: transparent; color: #e6e9f0; font-size: 14px; cursor: pointer; }
+.account-dropdown button:hover, .account-dropdown button:focus-visible { background: #2a2e3a; outline: none; }
+.account-dropdown button.danger { margin-top: 4px; border-top: 1px solid #343949; border-radius: 0 0 8px 8px; color: #ff8a8a; }

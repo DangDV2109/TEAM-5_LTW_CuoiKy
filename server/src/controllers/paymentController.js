@@ -1,4 +1,6 @@
 import Order from "../models/Order.js";
+import User from "../models/User.js";
+import Transaction from "../models/Transaction.js";
 import { ApiError, asyncHandler, ok } from "../utils/helpers.js";
 import { fulfillOrder } from "../utils/fulfill.js";
 import { getPayOS } from "../utils/payment.js";
@@ -62,4 +64,35 @@ export const simulateSuccess = asyncHandler(async (req, res) => {
 
   const result = await fulfillOrder(order._id, { method: order.paymentMethod || "SIMULATE" });
   ok(res, { order: result.order, ticket: result.ticket, alreadyPaid: result.alreadyPaid });
+});
+
+// Thanh toán đơn vé bằng số dư ví
+export const payWithWallet = asyncHandler(async (req, res) => {
+  if (!req.user) throw new ApiError(401, "Bạn cần đăng nhập để thanh toán bằng ví");
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new ApiError(404, "Không tìm thấy đơn hàng");
+  if (order.user && !order.user.equals(req.user._id)) throw new ApiError(403, "Bạn không có quyền với đơn hàng này");
+  if (order.status === "PAID") throw new ApiError(400, "Đơn hàng đã được thanh toán");
+  if (order.status === "CANCELLED") throw new ApiError(400, "Đơn hàng đã bị huỷ");
+  if (order.status === "EXPIRED") throw new ApiError(410, "Đơn đã hết hạn giữ ghế");
+  if (!order.total || order.total <= 0) throw new ApiError(400, "Đơn hàng chưa có tổng tiền, hãy checkout trước");
+
+  // Trừ tiền nguyên tử: chỉ trừ khi đủ số dư
+  const user = await User.findOneAndUpdate(
+    { _id: req.user._id, balance: { $gte: order.total } },
+    { $inc: { balance: -order.total } },
+    { new: true }
+  );
+  if (!user) throw new ApiError(402, "Số dư ví không đủ. Vui lòng nạp thêm tiền");
+
+  const result = await fulfillOrder(order._id, { method: "WALLET" });
+  if (!result || result.alreadyPaid) {
+    await User.updateOne({ _id: user._id }, { $inc: { balance: order.total } }); // hoàn lại nếu đơn không còn hợp lệ
+    throw new ApiError(409, "Không thể thanh toán đơn này");
+  }
+  await Transaction.create({
+    user: user._id, type: "PAYMENT", amount: order.total, method: "WALLET",
+    balanceAfter: user.balance, order: order._id, note: `Thanh toán vé ${order.showtime?.movieTitle || ""}`.trim(),
+  });
+  ok(res, { order: result.order, ticket: result.ticket, balance: user.balance });
 });

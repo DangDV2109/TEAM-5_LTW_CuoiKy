@@ -1,6 +1,11 @@
 // Backend giả chạy ngay trong trình duyệt. Dùng khi VITE_USE_MOCK=true hoặc fallback khi chưa bật server.
 // Dữ liệu lưu ở localStorage (khoá tv2_mock_db).
+import { moviesData, loadAndPruneCommunityPosts, softDeleteCommunityPost } from "../../../server/src/data/moviesData";
+
 const DB_KEY = "tv2_mock_db";
+const USERS_KEY = "tv2_mock_users";
+const TX_KEY = "tv2_mock_tx";
+const FAV_KEY = "tv2_mock_favorites";
 const USER_LIST_KEY = "ptit_cine_user_list_status_v1";
 const PRICE = { NORMAL: 80000, VIP: 110000, COUPLE: 180000 };
 
@@ -138,6 +143,25 @@ export const setUserListOverride = (email, listType, note) => {
   }
 };
 
+
+// ---------- Kho người dùng / giao dịch / yêu thích giả lập (localStorage) ----------
+const readJSON = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+const writeJSON = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const loadUsers = () => {
+  const cur = readJSON(USERS_KEY, null);
+  if (cur) return cur;
+  const seed = {};
+  [["Nguyễn Minh Quân", "minhquan@ptit.edu.vn", 250000, true], ["Lê Thu Hà", "thuha.le@gmail.com", 120000, true], ["Trần Hoàng Long", "hoanglong99@gmail.com", 0, false]].forEach(([name, email, balance, isVerified], i) => {
+    seed[email] = { id: `u_seed${i}`, name, email, role: "user", balance, isVerified, isLocked: false, createdAt: Date.now() - i * 86400000 };
+  });
+  writeJSON(USERS_KEY, seed);
+  return seed;
+};
+const saveUsers = (u) => writeJSON(USERS_KEY, u);
+const sessionEmail = () => { try { return JSON.parse(localStorage.getItem("user"))?.email?.toLowerCase() || null; } catch { return null; } };
+const addTx = (tx) => { const list = readJSON(TX_KEY, []); list.unshift({ id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`, createdAt: new Date().toISOString(), status: "SUCCESS", ...tx }); writeJSON(TX_KEY, list); };
+const publicUser = (u) => ({ ...u, id: u.id });
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const load = () => { try { return JSON.parse(localStorage.getItem(DB_KEY)) || { bookings: {} }; } catch { return { bookings: {} }; } };
 const save = (db) => localStorage.setItem(DB_KEY, JSON.stringify(db));
@@ -223,7 +247,7 @@ const toTicket = (b) => ({
   showtime: b.info
     ? [b.info.time, b.info.date, b.info.cinemaName, b.info.roomName].filter(Boolean).join(" · ")
     : SHOWTIMES[b.showtimeId]?.showtime || "",
-  seats: b.seatLabels,
+  seats: b.seatLabels, paymentMethod: b.paidMethod,
 });
 
 const ok = (config, data) => Promise.resolve({ data, status: 200, statusText: "OK", headers: {}, config, request: {} });
@@ -241,20 +265,121 @@ export default async function mockAdapter(config) {
 
   // --- Tài khoản ---
   if (method === "post" && path === "/auth/login") {
-    const email = String(body.email || "");
-    const name = email.split("@")[0] || "user";
-    const role = email.toLowerCase().startsWith("admin") ? "admin" : "user"; // email bắt đầu bằng "admin" => Admin
-    return ok(config, { token: "mock-token", user: { id: "u1", name, email, role } });
-  }
-  if (method === "post" && path === "/auth/register") return ok(config, { message: "ok" });
-  if (method === "get" && (path === "/users/me" || path === "/auth/me")) {
-    try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (!user) return fail(config, 401, "Chưa đăng nhập");
-      return ok(config, { ...user, user });
-    } catch {
-      return fail(config, 401, "Chưa đăng nhập");
+    const email = String(body.email || "").toLowerCase();
+    const users = loadUsers();
+    if (users[email]?.isLocked) return fail(config, 403, "Tài khoản đã bị khoá. Vui lòng liên hệ quản trị viên");
+    if (!users[email]) {
+      const role = email.startsWith("admin") ? "admin" : "user"; // email bắt đầu bằng "admin" => Admin
+      users[email] = { id: `u_${Date.now()}`, name: email.split("@")[0] || "user", email, role, balance: 0, isVerified: role === "admin", isLocked: false, createdAt: Date.now() };
+      saveUsers(users);
     }
+    return ok(config, { token: "mock-token", user: publicUser(users[email]) });
+  }
+  if (method === "post" && path === "/auth/register") {
+    const email = String(body.email || "").toLowerCase();
+    const users = loadUsers();
+    if (users[email]) return fail(config, 409, "Email đã được sử dụng");
+    users[email] = { id: `u_${Date.now()}`, name: body.name || email.split("@")[0], email, phone: body.phone, role: "user", balance: 0, isVerified: false, isLocked: false, createdAt: Date.now() };
+    saveUsers(users);
+    return ok(config, { message: "ok" });
+  }
+  if (method === "get" && (path === "/users/me" || path === "/auth/me")) {
+    const em = sessionEmail();
+    const u = em && loadUsers()[em];
+    if (!u) return fail(config, 401, "Chưa đăng nhập");
+    return ok(config, { ...u, user: u });
+  }
+
+  // --- Ví / nạp tiền ---
+  if (method === "post" && path === "/users/me/topup") {
+    const em = sessionEmail(); const users = loadUsers(); const u = em && users[em];
+    if (!u) return fail(config, 401, "Chưa đăng nhập");
+    const amount = Number(body.amount);
+    if (!Number.isInteger(amount) || amount < 10000 || amount > 10000000) return fail(config, 400, "Số tiền nạp phải từ 10.000đ đến 10.000.000đ");
+    u.balance = (u.balance || 0) + amount; saveUsers(users);
+    addTx({ userEmail: em, userName: u.name, type: "TOPUP", amount, method: body.method || "BANK", balanceAfter: u.balance, note: "Nạp tiền vào ví" });
+    return ok(config, { balance: u.balance });
+  }
+  if (method === "get" && path === "/users/me/transactions") {
+    const em = sessionEmail();
+    return ok(config, readJSON(TX_KEY, []).filter((t) => t.userEmail === em));
+  }
+  if (method === "post" && (m = path.match(/^\/payments\/wallet\/([^/]+)$/))) {
+    const em = sessionEmail(); const users = loadUsers(); const u = em && users[em];
+    const b = db.bookings[m[1]];
+    if (!u) return fail(config, 401, "Bạn cần đăng nhập để thanh toán bằng ví");
+    if (!b || !b.total) return fail(config, 404, "Không tìm thấy đơn hàng");
+    if (b.status === "PAID") return fail(config, 400, "Đơn hàng đã được thanh toán");
+    if ((u.balance || 0) < b.total) return fail(config, 402, "Số dư ví không đủ. Vui lòng nạp thêm tiền");
+    u.balance -= b.total; saveUsers(users);
+    b.status = "PAID"; b.paidMethod = "WALLET"; b.user = b.user || { name: u.name, email: u.email }; save(db);
+    addTx({ userEmail: em, userName: u.name, type: "PAYMENT", amount: b.total, method: "WALLET", balanceAfter: u.balance, note: `Thanh toán vé ${b.info?.movieTitle || ""}`.trim() });
+    return ok(config, { balance: u.balance });
+  }
+
+  // --- Đánh giá của tôi (lấy từ bài đánh giá cộng đồng do chính người dùng viết) ---
+  const movieTitle = (id) => moviesData.find((x) => Number(x.id) === Number(id))?.title || `Phim #${id}`;
+  if (method === "get" && path === "/users/me/reviews") {
+    return ok(config, loadAndPruneCommunityPosts().filter((p) => p.isOwn).map((p) => ({ id: p.id, movieId: p.movieId, movieTitle: movieTitle(p.movieId), rating: p.rating, comment: p.content, createdAt: p.createdAt })));
+  }
+
+  // --- Yêu thích ---
+  if (method === "get" && path === "/users/me/favorites") {
+    return ok(config, readJSON(FAV_KEY, {})[sessionEmail()] || []);
+  }
+  if (method === "post" && (m = path.match(/^\/users\/me\/favorites\/([^/]+)$/))) {
+    const em = sessionEmail(); if (!em) return fail(config, 401, "Chưa đăng nhập");
+    const all = readJSON(FAV_KEY, {}); const list = all[em] || [];
+    const has = list.some((f) => String(f.movieId) === m[1]);
+    all[em] = has ? list.filter((f) => String(f.movieId) !== m[1]) : [...list, { movieId: m[1], title: body.title, poster: body.poster, addedAt: Date.now() }];
+    writeJSON(FAV_KEY, all);
+    return ok(config, { favorite: !has, total: all[em].length });
+  }
+
+  // --- Admin ---
+  if (path.startsWith("/admin/") && !/^\/admin\/(movies|combos|stats)/.test(path)) {
+    let cur = null; try { cur = JSON.parse(localStorage.getItem("user")); } catch {}
+    if (String(cur?.role).toLowerCase() !== "admin") return fail(config, 403, "Chỉ quản trị viên mới có quyền thực hiện");
+    const params = config.params || {};
+
+    if (method === "get" && path === "/admin/users") {
+      const q = String(params.search || "").toLowerCase();
+      return ok(config, Object.values(loadUsers()).filter((u) => !q || [u.name, u.email, u.phone].some((x) => String(x || "").toLowerCase().includes(q))).sort((a, b) => b.createdAt - a.createdAt));
+    }
+    if (method === "patch" && (m = path.match(/^\/admin\/users\/([^/]+)$/))) {
+      const users = loadUsers(); const u = Object.values(users).find((x) => x.id === m[1]);
+      if (!u) return fail(config, 404, "Không tìm thấy tài khoản");
+      if (u.email === cur.email && body.isLocked) return fail(config, 400, "Không thể tự khoá chính mình");
+      Object.assign(u, ["isVerified", "isLocked"].reduce((o, k) => (typeof body[k] === "boolean" ? { ...o, [k]: body[k] } : o), {}));
+      saveUsers(users);
+      return ok(config, u);
+    }
+    if (method === "get" && path === "/admin/transactions") {
+      const rows = readJSON(TX_KEY, []).filter((t) => !params.type || t.type === params.type).map((t) => ({ ...t, user: { name: t.userName, email: t.userEmail } }));
+      return ok(config, rows);
+    }
+    if (method === "get" && path === "/admin/orders") {
+      return ok(config, Object.values(db.bookings).sort((a, b) => b.createdAt - a.createdAt).map((b) => ({
+        id: b.id, code: b.code, customer: b.user?.name || "Khách vãng lai", movieTitle: b.info?.movieTitle || SHOWTIMES[b.showtimeId]?.movieTitle || "Phim Demo",
+        showtime: b.info ? [b.info.time, b.info.date, b.info.cinemaName].filter(Boolean).join(" · ") : SHOWTIMES[b.showtimeId]?.showtime || "",
+        seats: b.seatLabels, total: b.total || b.seatsTotal, status: b.status === "HOLD" ? "PENDING_PAYMENT" : b.status,
+      })));
+    }
+    if (method === "get" && path === "/admin/reviews") {
+      return ok(config, loadAndPruneCommunityPosts().map((p) => ({ id: p.id, movieTitle: movieTitle(p.movieId), userName: p.author, rating: p.rating, comment: p.content, createdAt: p.createdAt })));
+    }
+    if (method === "get" && path === "/admin/favorites") {
+      const map = {};
+      Object.entries(readJSON(FAV_KEY, {})).forEach(([email, list]) => list.forEach((f) => {
+        const x = (map[f.movieId] ||= { movieId: f.movieId, title: f.title, poster: f.poster, count: 0, users: [] });
+        x.count += 1; x.users.push(loadUsers()[email]?.name || email);
+      }));
+      return ok(config, Object.values(map).sort((a, b) => b.count - a.count));
+    }
+  }
+  if (method === "delete" && (m = path.match(/^\/reviews\/([^/]+)$/))) {
+    softDeleteCommunityPost(m[1]);
+    return ok(config, { deleted: true });
   }
 
   // --- Lịch sử vé ---
